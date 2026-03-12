@@ -1,0 +1,24 @@
+[Unit]
+Description=Hailo Detect (hailo-apps) -> publish /detect to MediaMTX
+After=network-online.target mediamtx.service
+Wants=network-online.target mediamtx.service
+
+[Service]
+User=admin
+WorkingDirectory=/home/admin/hailo-apps
+Environment="HOME=/home/admin"
+Environment="tappas_postproc_path=/usr/lib/aarch64-linux-gnu/hailo/tappas/post_processes"
+Environment="LD_LIBRARY_PATH=/usr/lib/aarch64-linux-gnu/hailo/tappas/post_processes:/usr/lib/aarch64-linux-gnu/hailo/tappas/post_processes"
+
+ExecStart=/bin/bash -lc "source /home/admin/hailo-apps/venv_hailo_apps/bin/activate && \
+hailo-detect --input rtsp://127.0.0.1:8554/stream \
+--arch hailo10h \
+--hef-path /usr/local/hailo/resources/models/hailo10h/yolov8m.hef \
+--disable-sync"
+
+Restart=always
+RestartSec=2
+StartLimitIntervalSec=0
+
+[Install]
+WantedBy=multi-user.target

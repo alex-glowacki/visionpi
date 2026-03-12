@@ -1,7 +1,14 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
 *.py[codz]
 *$py.class
+
+# OS
+.DS_Store
+Thumbs.db
 
 # C extensions
 *.so
@@ -136,8 +143,11 @@ celerybeat.pid
 
 # Environments
 .env
+.env*
+!.env.example
 .envrc
 .venv
+.venv/
 env/
 venv/
 ENV/
@@ -186,7 +196,10 @@ cython_debug/
 #  that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
 #  and can be added to the global gitignore or merged into this file. However, if you prefer, 
 #  you could uncomment the following to ignore the entire vscode folder
-# .vscode/
+.vscode/
+.idea/
+*.swp
+*.swo
 
 # Ruff stuff:
 .ruff_cache/
@@ -205,3 +218,13 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Robot runtime artifacts
+/tmp/detections.json
+
+# PlatformIO
+firmware/**/.pio/
+firmware/**/.vscode/.browse.c_cpp.db*
+frimware/**/.vscode/c_cpp_properties.json
+firmware/**/.vscode/launch.json
+firmware/**/.vscode/ipch
