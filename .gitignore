@@ -233,3 +233,4 @@ firmware/nano/.vscode/.browse.c_cpp.db*
 firmware/nano/.vscode/c_cpp_properties.json
 firmware/nano/.vscode/launch.json
 frimware/nano/.vscode/ipch
+firmware/nano/.gitignore
