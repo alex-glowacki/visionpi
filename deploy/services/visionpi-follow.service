@@ -1,0 +1,24 @@
+[Unit]
+Description=VisionPi - person-follow behavior (real motor driver)
+# Requires the vision pipeline to be writing detections before starting.
+After=network-online.target hailo-detect-rtsp.service
+Wants=network-online.target hailo-detect-rtsp.service
+
+[Service]
+User=admin
+WorkingDirectory=/home/admin/visionpi
+Environment="HOME=/home/admin"
+
+ExecStart=/bin/bash -lc "source /home/admin/hailo-apps/venv_hailo_apps/bin/activate && \
+python3 -m apps.follow_person --driver real"
+
+# Graceful shutdown - sends SIGTERM, follow_person handles it cleanly
+KillSignal=SIGTERM
+TimeoutStopSec=5
+
+# Do NOT restart automatically - a crash should require human intervention.
+# when motors are involved.
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
