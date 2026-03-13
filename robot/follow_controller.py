@@ -76,7 +76,7 @@ class FollowController:
         
         self.driver.set_tracks(left, right)
         
-        action = "TURN_LEFT" if err < 0 else "TURN RIGHT"
+        action = "TURN_LEFT" if err < 0 else "TURN_RIGHT"
         return (
             f"{action} err={err:+.3f} cx={cx:.3f} "
             f"tracks=({left:+.2f},{right:+.2f}) "
