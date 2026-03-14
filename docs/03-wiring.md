@@ -9,14 +9,15 @@
 
 ## Device Overview
 
-| Device                  | Role                                    | Interface              |
-|-------------------------|-----------------------------------------|------------------------|
-| Arduino Nano R4         | Motor controller / Modulino host        | USB, GPIO, Qwiic       |
-| Sabertooth Motor Driver | Dual-channel PWM motor driver           | PWM (S1/S2), Power     |
-| Left Track Motor        | Left drive motor w/ quadrature encoder  | GPIO, Sabertooth       |
-| Right Track Motor       | Right drive motor w/ quadrature encoder | GPIO, Sabertooth       |
-| Modulino Movement       | IMU (accelerometer/gyroscope)           | Qwiic (I2C)            |
-| Modulino Pixels         | LED indicator array                     | Qwiic (I2C)            |
+| Device                  | Role                                    | Interface          |
+| ----------------------- | --------------------------------------- | ------------------ |
+| Arduino Nano R4         | Motor controller / Modulino host        | USB, GPIO, Qwiic   |
+| Sabertooth Motor Driver | Dual-channel PWM motor driver           | PWM (S1/S2), Power |
+| Left Track Motor        | Left drive motor w/ quadrature encoder  | GPIO, Sabertooth   |
+| Right Track Motor       | Right drive motor w/ quadrature encoder | GPIO, Sabertooth   |
+| Modulino Movement       | IMU (accelerometer/gyroscope)           | Qwiic (I2C)        |
+| Modulino Pixels         | LED indicator array                     | Qwiic (I2C)        |
+| TF-Luna LiDAR           | Distance/proximity sensor               | UART (D0/D1)       |
 
 ---
 
@@ -24,26 +25,26 @@
 
 ### Power Terminals
 
-| Terminal | Connection           | Notes                   |
-|----------|----------------------|-------------------------|
-| B+       | LiFePO4 Battery (+)  | Main drive power input  |
-| B−       | LiFePO4 Battery (−)  | Main drive power ground |
+| Terminal | Connection          | Notes                   |
+| -------- | ------------------- | ----------------------- |
+| B+       | LiFePO4 Battery (+) | Main drive power input  |
+| B−       | LiFePO4 Battery (−) | Main drive power ground |
 
 ### Motor Terminals
 
-| Terminal | Connection              | Notes           |
-|----------|-------------------------|-----------------|
-| M1A      | Left Motor — Red wire   | Left track (+)  |
-| M1B      | Left Motor — Black wire | Left track (−)  |
-| M2A      | Right Motor — Red wire  | Right track (+) |
-| M2B      | Right Motor — Black wire| Right track (−) |
+| Terminal | Connection               | Notes           |
+| -------- | ------------------------ | --------------- |
+| M1A      | Left Motor — Red wire    | Left track (+)  |
+| M1B      | Left Motor — Black wire  | Left track (−)  |
+| M2A      | Right Motor — Red wire   | Right track (+) |
+| M2B      | Right Motor — Black wire | Right track (−) |
 
 ### Signal Ports (PWM from Arduino Nano R4)
 
 Each signal port (S1, S2) uses a 3-wire connector: Red (5V), Black (GND), White (Signal).
 
 | Sabertooth Port | Wire  | Arduino Nano R4 Pin | Notes              |
-|-----------------|-------|---------------------|--------------------|
+| --------------- | ----- | ------------------- | ------------------ |
 | S1              | White | D9                  | Left track PWM     |
 | S1              | Red   | 5V                  | Signal port power  |
 | S1              | Black | GND                 | Signal port ground |
@@ -60,28 +61,41 @@ Yellow, White, Blue, and Gray are encoder wires routed to the Arduino Nano R4.
 
 ### Left Track Motor
 
-| Wire   | Function         | Destination              | Notes                    |
-|--------|------------------|--------------------------|--------------------------|
-| Red    | Motor Power (+)  | Sabertooth M1A           | Via Sabertooth, not Nano |
-| Black  | Motor Power (−)  | Sabertooth M1B           | Via Sabertooth, not Nano |
-| Yellow | Encoder A Output | Arduino Nano R4 — D2     | Quadrature signal A      |
-| White  | Encoder B Output | Arduino Nano R4 — D3     | Quadrature signal B      |
-| Blue   | Encoder VCC      | Arduino Nano R4 — 3.3V   | 3.3V–24V range supported |
-| Gray   | Encoder GND      | Arduino Nano R4 — GND    | Encoder ground           |
+| Wire   | Function         | Destination            | Notes                    |
+| ------ | ---------------- | ---------------------- | ------------------------ |
+| Red    | Motor Power (+)  | Sabertooth M1A         | Via Sabertooth, not Nano |
+| Black  | Motor Power (−)  | Sabertooth M1B         | Via Sabertooth, not Nano |
+| Yellow | Encoder A Output | Arduino Nano R4 — D2   | Quadrature signal A      |
+| White  | Encoder B Output | Arduino Nano R4 — D3   | Quadrature signal B      |
+| Blue   | Encoder VCC      | Arduino Nano R4 — 3.3V | 3.3V–24V range supported |
+| Gray   | Encoder GND      | Arduino Nano R4 — GND  | Encoder ground           |
 
 ### Right Track Motor
 
-| Wire   | Function         | Destination              | Notes                    |
-|--------|------------------|--------------------------|--------------------------|
-| Red    | Motor Power (+)  | Sabertooth M2A           | Via Sabertooth, not Nano |
-| Black  | Motor Power (−)  | Sabertooth M2B           | Via Sabertooth, not Nano |
-| Yellow | Encoder A Output | Arduino Nano R4 — D4     | Quadrature signal A      |
-| White  | Encoder B Output | Arduino Nano R4 — D5     | Quadrature signal B      |
-| Blue   | Encoder VCC      | Arduino Nano R4 — 3.3V   | 3.3V–24V range supported |
-| Gray   | Encoder GND      | Arduino Nano R4 — GND    | Encoder ground           |
+| Wire   | Function         | Destination            | Notes                    |
+| ------ | ---------------- | ---------------------- | ------------------------ |
+| Red    | Motor Power (+)  | Sabertooth M2A         | Via Sabertooth, not Nano |
+| Black  | Motor Power (−)  | Sabertooth M2B         | Via Sabertooth, not Nano |
+| Yellow | Encoder A Output | Arduino Nano R4 — D4   | Quadrature signal A      |
+| White  | Encoder B Output | Arduino Nano R4 — D5   | Quadrature signal B      |
+| Blue   | Encoder VCC      | Arduino Nano R4 — 3.3V | 3.3V–24V range supported |
+| Gray   | Encoder GND      | Arduino Nano R4 — GND  | Encoder ground           |
 
 > **Note:** Encoder A (Yellow) leads Encoder B (White) when the motor spins forward.
 > Swap Yellow/White in firmware if direction reads inverted.
+
+---
+
+## TF-Luna LiDAR
+
+The TF-Luna communicates over UART. Its GND is shared with the Sabertooth S1 GND connection, both tied to the Arduino Nano R4 GND.
+
+| TF-Luna Pin | Connection                                            | Notes                               |
+| ----------- | ----------------------------------------------------- | ----------------------------------- |
+| 5V          | Arduino Nano R4 — 5V                                  | Sensor power                        |
+| GND         | Shared with Sabertooth S1 Black → Arduino Nano R4 GND | Shared ground                       |
+| RX          | Arduino Nano R4 — D1 (TX)                             | Nano TX → Luna RX (receives config) |
+| TX          | Arduino Nano R4 — D0 (RX)                             | Luna TX → Nano RX (distance data)   |
 
 ---
 
@@ -98,7 +112,7 @@ Modulino Movement  ──►  Modulino Pixels
 ```
 
 | Device            | Qwiic Position | I2C Address | Notes                   |
-|-------------------|----------------|-------------|-------------------------|
+| ----------------- | -------------- | ----------- | ----------------------- |
 | Modulino Movement | 1st in chain   | Confirmed   | Accelerometer/gyroscope |
 | Modulino Pixels   | 2nd in chain   | Confirmed   | LED indicator array     |
 
@@ -108,19 +122,22 @@ Modulino Movement  ──►  Modulino Pixels
 
 ## Arduino Nano R4 — Pin Summary
 
-| Pin   | Connected To                        | Function               |
-|-------|-------------------------------------|------------------------|
-| D2    | Left Motor — Encoder A (Yellow)     | Quadrature input       |
-| D3    | Left Motor — Encoder B (White)      | Quadrature input       |
-| D4    | Right Motor — Encoder A (Yellow)    | Quadrature input       |
-| D5    | Right Motor — Encoder B (White)     | Quadrature input       |
-| D9    | Sabertooth S1 — White               | Left track PWM output  |
-| D10   | Sabertooth S2 — White               | Right track PWM output |
-| 3.3V  | Left & Right Motor — Encoder VCC (Blue) | Encoder power      |
-| 5V    | Sabertooth S1/S2 — Red              | Signal port power      |
-| GND   | Sabertooth S1/S2 — Black            | Signal port ground     |
-| GND   | Left & Right Motor — Encoder GND (Gray) | Encoder ground     |
-| Qwiic | Modulino Movement (1st in chain)    | I2C chain start        |
+| Pin   | Connected To                            | Function                |
+| ----- | --------------------------------------- | ----------------------- |
+| D2    | Left Motor — Encoder A (Yellow)         | Quadrature input        |
+| D3    | Left Motor — Encoder B (White)          | Quadrature input        |
+| D4    | Right Motor — Encoder A (Yellow)        | Quadrature input        |
+| D5    | Right Motor — Encoder B (White)         | Quadrature input        |
+| D9    | Sabertooth S1 — White                   | Left track PWM output   |
+| D10   | Sabertooth S2 — White                   | Right track PWM output  |
+| 3.3V  | Left & Right Motor — Encoder VCC (Blue) | Encoder power           |
+| D0    | TF-Luna — TX                            | UART RX (distance data) |
+| D1    | TF-Luna — RX                            | UART TX (config)        |
+| 5V    | Sabertooth S1/S2 — Red                  | Signal port power       |
+| 5V    | TF-Luna — 5V                            | Sensor power            |
+| GND   | Sabertooth S1/S2 — Black + TF-Luna GND  | Shared ground           |
+| GND   | Left & Right Motor — Encoder GND (Gray) | Encoder ground          |
+| Qwiic | Modulino Movement (1st in chain)        | I2C chain start         |
 
 ---
 
