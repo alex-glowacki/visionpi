@@ -1,14 +1,14 @@
 [Unit]
 Description=VisionPi — Hailo detect_model1 → /tmp/detections.json
-After=network-online.target mediamtx.service
-Wants=network-online.target mediamtx.service
+After=network-online.target mediamtx.service rtsp-publisher.service
+Wants=network-online.target mediamtx.service rtsp-publisher.service
 
 [Service]
 User=admin
 WorkingDirectory=/home/admin/visionpi
 
-# Release any stale Hailo lock before starting
-ExecStartPre=/bin/bash -c "sudo fuser -k /dev/hailo0 2>/dev/null; sleep 0.5"
+# Release any stale Hailo lock, then wait for the RTSP stream to be ready
+ExecStartPre=/bin/bash -c "sudo fuser -k /dev/hailo0 2>/dev/null; sleep 3"
 
 ExecStart=/bin/bash -lc "\
   source /home/admin/hailo-apps/venv_hailo_apps/bin/activate && \
