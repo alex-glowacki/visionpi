@@ -5,7 +5,7 @@ Wants=network-online.target mediamtx.service
 
 [Service]
 User=admin
-WorkingDirectory=/home/admin/visionpi-robot
+WorkingDirectory=/home/admin/visionpi
 
 # Release any stale Hailo lock before starting
 ExecStartPre=/bin/bash -c "sudo fuser -k /dev/hailo0 2>/dev/null; sleep 0.5"
