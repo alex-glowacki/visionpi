@@ -1,0 +1,26 @@
+[Unit]
+Description=VisionPi — Hailo detect_model1 → /tmp/detections.json
+After=network-online.target mediamtx.service
+Wants=network-online.target mediamtx.service
+
+[Service]
+User=admin
+WorkingDirectory=/home/admin/visionpi-robot
+
+# Release any stale Hailo lock before starting
+ExecStartPre=/bin/bash -c "sudo fuser -k /dev/hailo0 2>/dev/null; sleep 0.5"
+
+ExecStart=/bin/bash -lc "\
+  source /home/admin/hailo-apps/venv_hailo_apps/bin/activate && \
+  python3 -u vision/detect_model1.py"
+
+Restart=on-failure
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
