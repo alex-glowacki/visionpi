@@ -26,18 +26,44 @@ pip install -e ".[pi]"
 bash deploy/apply_patches.sh
 ```
 
-## 4. Install systemd services
+## 4. Configure MediaMTX
+
+MediaMTX must serve RTP over TCP (not UDP) for `rtspsrc` to receive frames.
+Edit `/opt/mediamtx/mediamtx.yml` and update the `paths:` section:
+
+```yaml
+paths:
+  stream:
+    rtspTransport: tcp
+  detect:
+    rtspTransport: tcp
+  all_others:
+```
+
+Then restart MediaMTX:
+
+```bash
+sudo systemctl restart mediamtx
+```
+
+> **Why:** The `rtsp-publisher` service sends to MediaMTX over UDP, which is
+> fine for publishing. But on the consumer side, `rtspsrc` cannot receive UDP
+> RTP packets on loopback due to port routing. Forcing TCP on the MediaMTX
+> path ensures consumers always receive RTP interleaved over the TCP control
+> channel, which works reliably on loopback.
+
+## 5. Install systemd services
 
 ```bash
 bash deploy/install_services.sh
 ```
 
-## 5. Run
+## 6. Run
 
 ```bash
 # Terminal 1 — vision pipeline
 source ~/hailo-apps/venv_hailo_apps/bin/activate
-python3 -u vision/detect_to_json.py
+python3 -u vision/detect_model1.py
 
 # Terminal 2 — follow person
 python3 -m apps.follow_person --driver real
