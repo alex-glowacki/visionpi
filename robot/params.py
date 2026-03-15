@@ -18,19 +18,19 @@ class FollowParams:
         
     So:
         err < 0 => person is left of center (turn left)
-        err > 0 => person is right of center (turn right)
+        err > 0 => person is right of center (turn right) 
     """
     
     # Vision filtering
-    min_conf: float = 0.30          # Ignore detections below this confidence
+    min_conf: float = 0.30              # Ignore detections below this confidence
     
     # Steering behavior
-    deadband: float = 0.06          # Within abs(err) < deadband, go straight
-    steer_gain: float = 1.2         # Multiplies err into a steer value
+    deadband: float = 0.06              # Within abs(err) < deadband, go straight
+    steer_gain: float = 1.50            # Multiplies err into a steer value
     
     # Speeds (normalized -1..+1)
-    base_speed: float = 0.35        # Forwared speed when target is centered
-    turn_speed: float = 0.25        # Steering influence on left/right tracks
+    base_speed: float = 0.80            # Forward speed when target is centered
+    turn_speed: float = 0.65            # Steering influence on left/right wheels
     
     # If target is far off-center, reduce forward motion to avoid spiralling
-    hard_turn_err: float = 0.25     # abs(err) >= this => base speed becomes 0
+    hard_turn_err: float = 0.25         # abs(err) >= this => base speed becomes 0
