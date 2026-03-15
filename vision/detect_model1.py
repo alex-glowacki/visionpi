@@ -110,7 +110,6 @@ class DetectModel1:
             f'rtph264depay ! h264parse ! avdec_h264 ! '
             f'videoconvert ! videoscale ! '
             f'video/x-raw,format=RGB,width={s.width},height={s.height},framerate={s.fps} ! '
-            f'queue ! '
             f'hailonet hef-path="{s.hef_path}" batch-size=1 force-writable=true ! '
             f'queue ! '
             f'hailofilter so-path="{s.post_so}" function-name={s.post_fn} ! '
@@ -124,7 +123,7 @@ class DetectModel1:
             f'x264enc tune=zerolatency bitrate={s.bitrate_kbps} speed-preset=ultrafast '
             f'key-int-max=30 bframes=0 byte-stream=true ! '
             f'h264parse config-interval=1 ! '
-            f'rtspclientsink location="{s.output_uri}" protocols=tcp async=false'
+            f'rtspclientsink location="{s.output_uri}" protocols=tcp'
         )
 
     def _process_sample(self, buf: Gst.Buffer) -> None:
