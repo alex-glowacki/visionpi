@@ -50,16 +50,18 @@ class FollowController:
         if target is None:
             self.driver.stop()
             return "STOP (no person)"
-        
-        # Normalized bbox center X; err < 0 = left, err > 0 = right
-        cx = target.x + target.w / 2.0
+
+        # Normalized bbox center X, mirrored to correct for upside-down camera.
+        # err < 0 = person is left of center (turn left)
+        # err > 0 = person is right of center (turn right)
+        cx = 1.0 - (target.x + target.w / 2.0)
         err = cx - 0.5
-        
+
         # Reduce forward speed when far off-center to avoid spiralling
         base = self.p.base_speed
         if abs(err) >= self.p.hard_turn_err:
             base = 0.0
-            
+
         # Dead-band: go straight if nearly centered
         if abs(err) <= self.p.deadband:
             speed = base if base > 0 else self.p.base_speed
@@ -68,14 +70,14 @@ class FollowController:
                 f"FORWARD err={err:+.3f} cx={cx:.3f} "
                 f"id={target.track_id} conf={target.confidence:.2f}"
             )
-            
+
         # Differential steering
         steer = clamp(err * self.p.steer_gain, -1.0, 1.0)
         left = clamp(base - steer * self.p.turn_speed, -1.0, 1.0)
         right = clamp(base + steer * self.p.turn_speed, -1.0, 1.0)
-        
+
         self.driver.set_tracks(left, right)
-        
+
         action = "TURN_LEFT" if err < 0 else "TURN_RIGHT"
         return (
             f"{action} err={err:+.3f} cx={cx:.3f} "
