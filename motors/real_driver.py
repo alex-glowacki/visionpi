@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import re
 import time
 from typing import Optional
 
@@ -14,14 +15,19 @@ try:
 except ImportError as e:
     raise ImportError(
         "pyserial is required for real hardware. "
-        "Install with: pip install -e '.[dev]'"
+        "Install with: pip install -e . '[.dev]'"
     ) from e
     
 
+# Matches the Nano's 500ms debug line, e.g.:
+#   cmd=(0.300,0.300) out=(0.295,0.295) lidar=45cm movement=yes ax=12 ay=-8 gz=3 pixels=yes
+#   cmd=(0.000,0.000) out=(0.000,0.000) lidar=none movement=yes pixels=yes
+_TELEMETRY_RE = re.compile(r"\blidar=(?P<dist>\d+)cm\b")
+
 def _auto_detect_port() -> str:
     """
-    Hueristically pick the most likely Nano port from all available serial ports.
-    Scoring: Arduino descriptor > 'nano' in description > ACM device > USB device.
+    Heuristically pick the most likely Nano port from all available serial ports.
+    Scoring: Arduino descriptor > 'nano' in description > AMC device > USB device.
     """
     ports = list(list_ports.comports())
     if not ports:
@@ -35,7 +41,7 @@ def _auto_detect_port() -> str:
         
         score = 0
         if "arduino" in desc or "arduino" in hwid:
-            score += 5
+            score +=5
         if "nano" in desc:
             score += 3
         if "acm" in dev:
@@ -57,8 +63,14 @@ class RealMotorDriver:
     (LiDAR, tilt, host timeout) independently of this driver.
     
     LiDAR telemetry is parsed from Nano debug lines so upstream code can
-    optionally read distance values via :attr:`latest_lidar_cm` /
-    :attr:`lidar_age_s`.
+    optionally read distance values via ::attr::`latest_lidar_cm` /
+    ::attr::`lidar_age_s`.
+    
+    The Nano emits telemetry every 500ms (when DEBUG_USB = true) in the form::
+    
+        cmd=(<l>,<r>) out=(<l>,<r>) lidar=<Ncm|none> movement=<yes|no> ...
+        
+    This driver extracts the ``lidar=Ncm`` field via regex.
     """
     
     def __init__(
@@ -89,24 +101,25 @@ class RealMotorDriver:
         time.sleep(warmup_s)    # allow Nano to reboot on serial open
         self.stop()
         
+    
     def _drain_telemetry(self) -> None:
         """
         Non-blocking read of any pending lines from the Nano.
-        Parses LiDAR distance from debug telemetry lines such as::
         
-            LIDAR_CM=123 BLOCKED=0
+        Parses LiDAR distance from the Nano's 500 ms debug telemetry lines::
+        
+            cmd=(...) out=(...) lidar=45cm movement=yes ...
+            
+        When the LiDAR has not valid reading the Nano emits ``lidar=none``,
+        which does not match the regex and leaves the previous value intact.
         """
         try:
             while self.ser.in_waiting:
                 line = self.ser.readline().decode(errors="ignore").strip()
-                if line.startswith("LIDAR_CM="):
-                    parts = line.split()
-                    cm_str = parts[0].split("=", 1)[1]
-                    try:
-                        self._latest_lidar_cm = int(cm_str)
-                        self._last_lidar_ts = time.monotonic()
-                    except ValueError:
-                        pass
+                m = _TELEMETRY_RE.search(line)
+                if m:
+                    self._latest_lidar_cm = int(m.group("dist"))
+                    self._last_lidar_ts = time.monotonic()
         except Exception:
             # Never let telemetry parsing crash motor control.
             pass
@@ -150,7 +163,7 @@ class RealMotorDriver:
                 self.ser.close()
             except Exception:
                 pass
-    
+            
     @property
     def latest_lidar_cm(self) -> Optional[int]:
         """Most recently parsed LiDAR distance in cm, or None if not yet received."""
