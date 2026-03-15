@@ -62,13 +62,15 @@ class TestUpdate:
 
     def test_turn_right_when_person_right_of_centre(self, mock_driver, default_params):
         ctrl = FollowController(mock_driver, default_params)
-        status = ctrl.update(make_frame([make_person(cx=0.75)]))
+        # cx=0.25 in raw frame → mirrored to 0.75 → right of centre
+        status = ctrl.update(make_frame([make_person(cx=0.25)]))
         assert "TURN_RIGHT" in status
         assert mock_driver._last_right >= mock_driver._last_left
 
     def test_turn_left_when_person_left_of_centre(self, mock_driver, default_params):
         ctrl = FollowController(mock_driver, default_params)
-        status = ctrl.update(make_frame([make_person(cx=0.25)]))
+        # cx=0.75 in raw frame → mirrored to 0.25 → left of centre
+        status = ctrl.update(make_frame([make_person(cx=0.75)]))
         assert "TURN_LEFT" in status
         assert mock_driver._last_left >= mock_driver._last_right
 
